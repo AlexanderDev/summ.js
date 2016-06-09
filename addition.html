@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Addition</title>
+    <style type="text/css">
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, Helvetica, Sans-Serif;
+            color: black;
+        }
+        
+        .header {
+            min-height: 3em;
+            margin-bottom: 2em;
+        }
+        
+        .header #wrapper {
+            text-align: center;
+        }
+        /* Header text */
+        
+        .header div {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .header #wrapper div {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        /* Text */
+        
+        .header #wrapper div:last-child {}
+        /* Logo */
+        
+        .header #wrapper div:first-child {
+            margin: 8px 30px 3px 0px;
+        }
+        
+        .header hr {
+            border: none;
+            background-color: #32382C;
+            height: 2px;
+        }
+        
+        .maket {
+            min-height: 100%;
+            position: relative;
+            width: 90%;
+            max-width: 1100px;
+            margin: auto;
+        }
+        
+        #content,
+        .header #wrapper {}
+        
+        #content {
+            /*padding-top: 2%;*/
+            text-align: center;
+            padding-bottom: 6em;
+            overflow: auto;
+        }
+        
+        div.task span {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+        window.onload = function() {
+            var drawingCanvas = document.getElementById('canvas');
+            if (drawingCanvas && drawingCanvas.getContext) {
+
+            }
+        }
+    </script>
+    <div class="maket">
+        <div class="header">
+            <div id="wrapper">
+                <div>Сложите два числа</div>
+            </div>
+            <!-- Horisontal line -->
+            <hr>
+        </div>
+        <div id="content">
+            <div class="task"><span>7+14 = 11</span></div>
+        </div>
+        <canvas id="canvas" width="900" height="200"></canvas>
+    </div>
+</body>
+
+</html>
