@@ -91,6 +91,10 @@
             return {x:x, y:y}
         }
 
+        function subtraction_vec(a, b){
+            return Vector(a.x-b.x, a.y-b.y)
+        }
+
         function normal(vec){
             return normalize(Vector(vec.y, -vec.x))
         }
@@ -154,12 +158,27 @@
         }
 
         function draw_curve(ctx, start_point, end_point, radius) {
-            draw_point(ctx, Point(20, 100), 2)
-            draw_point(ctx, Point(200, 100), 2)
+            direction = subtraction_vec(end_point, start_point)
+            norm_dir = normalize(direction)
+            radius = typeof(radius)!='undefined'? radius : len_vec(direction)*0.4;
+            midpoint1 = sum_vec(sum_vec(
+                vec_scalar(norm_dir, len_vec(direction)*1/5.0), 
+                vec_scalar(normal(direction), radius)
+                ), start_point)
+            midpoint2 = sum_vec(sum_vec(
+                vec_scalar(norm_dir, len_vec(direction)*4/5.0), 
+                vec_scalar(normal(direction), radius)
+                ), start_point)
+
+            ctx.lineWidth = 1.5;
+            draw_arrow(ctx, normalize(subtraction_vec(end_point, midpoint2)), end_point, 10)
+
+            // draw_point(ctx, midpoint1, 2)
+            // draw_point(ctx, midpoint2, 2)
+
             ctx.beginPath();
             ctx.moveTo(start_point.x, start_point.y);
-            // ctx.quadraticCurveTo(110, -radius, end_point.x, end_point.y);
-            ctx.bezierCurveTo(20,100,200,100,200,20);
+            ctx.bezierCurveTo(midpoint1.x, midpoint1.y, midpoint2.x, midpoint2.y, end_point.x, end_point.y);
             ctx.stroke();
         }
 
@@ -168,13 +187,11 @@
             if (drawingCanvas && drawingCanvas.getContext) {
                 var ctx = drawingCanvas.getContext("2d");
                 // draw_point(ctx, Point(200, 20), 2)
-                // draw_curve(ctx, Point(20, 20), Point(200, 20), -100)
-                start_point = Point(20, 20)
-                a = Vector(100, 0)
-                b = rotate_vec(a, 90)
+                draw_curve(ctx, Point(20, 200), Point(200, 200))
+
                 // b = Vector(50, 10)
 
-                draw_vec(ctx, a, start_point)
+                // draw_vec(ctx, a, start_point)
                 // draw_vec(ctx, vec_scalar(normal(a), -20), start_point)
                 // draw_vec(ctx, b, start_point)
 
