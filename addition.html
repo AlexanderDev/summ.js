@@ -72,9 +72,19 @@
         }
         
         canvas {
-            display: block;
-            margin: 0 auto;
+            position:absolute;
+            left:0px;
+            top:0px;
         }
+
+        div.canvas_cont {
+            margin: 0 auto;
+            position:relative; 
+            width:900px; 
+            height:200px;
+            top:2em;
+        }
+
     </style>
 </head>
 
@@ -87,47 +97,50 @@
             }
         }
 
-        function Vector(x, y){
-            return {x:x, y:y}
+        function Vector(x, y) {
+            return {
+                x: x,
+                y: y
+            }
         }
 
-        function subtraction_vec(a, b){
-            return Vector(a.x-b.x, a.y-b.y)
+        function subtraction_vec(a, b) {
+            return Vector(a.x - b.x, a.y - b.y)
         }
 
-        function normal(vec){
+        function normal(vec) {
             return normalize(Vector(vec.y, -vec.x))
         }
 
-        function len_vec(vec){
+        function len_vec(vec) {
             return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
         }
 
-        function normalize(vec){
+        function normalize(vec) {
             l = len_vec(vec)
-            return Vector(vec.x/l, vec.y/l)
+            return Vector(vec.x / l, vec.y / l)
         }
 
-        function sum_vec(a, b){
-            return Vector(a.x+b.x, a.y+b.y)
+        function sum_vec(a, b) {
+            return Vector(a.x + b.x, a.y + b.y)
         }
 
-        function rotate_vec(vec, deg){
+        function rotate_vec(vec, deg) {
             radians = to_rad(deg)
             ca = Math.cos(radians);
             sa = Math.sin(radians);
-            return Vector(ca*vec.x - sa*vec.y, sa*vec.x + ca*vec.y)
+            return Vector(ca * vec.x - sa * vec.y, sa * vec.x + ca * vec.y)
         }
 
-        function vec_scalar(vec, scalar){
-            return Vector(vec.x*scalar, vec.y*scalar)
+        function vec_scalar(vec, scalar) {
+            return Vector(vec.x * scalar, vec.y * scalar)
         }
 
-        function to_rad(deg){
-            return deg*Math.PI/180
+        function to_rad(deg) {
+            return deg * Math.PI / 180
         }
 
-        function draw_vec(ctx, vec, start_point){
+        function draw_vec(ctx, vec, start_point) {
             end_point = sum_vec(vec, start_point)
             ctx.beginPath();
             ctx.moveTo(start_point.x, start_point.y);
@@ -138,20 +151,20 @@
             draw_arrow(ctx, normalize(vec), end_point, 10)
         }
 
-        function draw_arrow(ctx, direction, end_point, len){
+        function draw_arrow(ctx, direction, end_point, len) {
             left = vec_scalar(rotate_vec(direction, 160), len)
             right = vec_scalar(rotate_vec(direction, -160), len)
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(end_point.x, end_point.y);
-            ctx.lineTo(end_point.x+left.x, end_point.y+left.y);
+            ctx.lineTo(end_point.x + left.x, end_point.y + left.y);
             ctx.moveTo(end_point.x, end_point.y);
-            ctx.lineTo(end_point.x+right.x, end_point.y+right.y);
+            ctx.lineTo(end_point.x + right.x, end_point.y + right.y);
             ctx.stroke();
             ctx.restore();
         }
 
-        function draw_point(ctx, point, radius){
+        function draw_point(ctx, point, radius) {
             ctx.beginPath();
             ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, true);
             ctx.stroke();
@@ -159,20 +172,20 @@
 
         function draw_curve(ctx, start_point, end_point, radius) {
             direction = subtraction_vec(end_point, start_point)
-            radius = typeof(radius)!='undefined'? radius : len_vec(direction)*0.4;
+            radius = typeof(radius) != 'undefined' ? radius : len_vec(direction) * 0.4;
 
             // Find point over line (startpoint, endpoint)
-            function uppoints(ratio, height){
+            function uppoints(ratio, height) {
                 return sum_vec(sum_vec(
-                        vec_scalar(normalize(direction), len_vec(direction)*ratio), 
-                        vec_scalar(normal(direction), height)
+                    vec_scalar(normalize(direction), len_vec(direction) * ratio),
+                    vec_scalar(normal(direction), height)
                 ), start_point)
             }
 
-            
-            midpoint1 = uppoints(1/5.0, radius)
-            midpoint2 = uppoints(4/5.0, radius)
-            midpoint =  uppoints(0.5, radius)
+
+            midpoint1 = uppoints(1 / 5.0, radius)
+            midpoint2 = uppoints(4 / 5.0, radius)
+            midpoint = uppoints(0.5, radius)
 
             draw_arrow(ctx, normalize(subtraction_vec(end_point, midpoint2)), end_point, 10)
 
@@ -188,21 +201,43 @@
             return midpoint
         }
 
-        window.onload = function() {
-            var drawingCanvas = document.getElementById('canvas');
-            if (drawingCanvas && drawingCanvas.getContext) {
-                var ctx = drawingCanvas.getContext("2d");
-                ctx.lineWidth = 1.5;
-                draw_curve(ctx, Point(20, 200), Point(200, 200))
+        function Ruler(ctx_img, img_name, start_point, end_point, unit_px) {
+            var loaded = false
+            var width, height
+
+            img = new Image();
+            img.src = img_name
+            img.onload = function() {
+                loaded = true
+                ctx_img.drawImage(img, 0, 0)
+                width = img.width
+                height = img.height
             }
 
-            var img = new Image();   // Создать новый объект Image
-            img.src = 'sprite.png'; // Установить путь к источнику
-            img.onload = function(){
-                // выполнить drawImage здесь
-                console.log('Load image')
-                ctx.drawImage(img, 0, 0)
+            return {
+                add_range:function(ctx, start, stop){
+                    function unit2px(unit){
+                        return Point(start_point.x+unit_px*unit, start_point.y)
+                    }
+                    console.log(unit2px(start), unit2px(stop))
+                    draw_curve(ctx, unit2px(start), unit2px(stop))
+                }
             }
+        }
+
+
+        window.onload = function() {
+            var canvas_top = document.getElementById('canvas_top');
+            var canvas_bottom = document.getElementById('canvas_bottom');
+
+            var ctx_bottom = canvas_bottom.getContext("2d");
+            var ctx_top = canvas_top.getContext("2d");
+
+            ctx_top.lineWidth = 1.5;
+            ctx_bottom.lineWidth = 1.5;
+
+            ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 19), Point(815, 19), 39)
+            ruler.add_range(ctx_top, 0, 5)
         }
     </script>
     <div class="maket">
@@ -215,8 +250,11 @@
         </div>
         <div id="content">
             <div class="task"><span>7+14 = 11</span></div>
+            <div class="canvas_cont">
+                <canvas id="canvas_top" style="z-index: 2;" width="900" height="200"></canvas>
+                <canvas id="canvas_bottom" style="z-index: 1;" width="900" height="200"></canvas>
+            </div>
         </div>
-        <canvas id="canvas" width="900" height="200"></canvas>
     </div>
 </body>
 
