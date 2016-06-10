@@ -91,6 +91,10 @@
             return {x:x, y:y}
         }
 
+        function normal(vec){
+            return normalize(Vector(vec.y, -vec.x))
+        }
+
         function len_vec(vec){
             return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
         }
@@ -124,15 +128,15 @@
             ctx.beginPath();
             ctx.moveTo(start_point.x, start_point.y);
             ctx.lineTo(end_point.x, end_point.y);
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1.5;
             // ctx.strokeStyle="red";
             ctx.stroke();
             draw_arrow(ctx, normalize(vec), end_point, 10)
         }
 
         function draw_arrow(ctx, direction, end_point, len){
-            left = vec_scalar(rotate_vec(direction, 150), len)
-            right = vec_scalar(rotate_vec(direction, -150), len)
+            left = vec_scalar(rotate_vec(direction, 160), len)
+            right = vec_scalar(rotate_vec(direction, -160), len)
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(end_point.x, end_point.y);
@@ -166,27 +170,13 @@
                 // draw_point(ctx, Point(200, 20), 2)
                 // draw_curve(ctx, Point(20, 20), Point(200, 20), -100)
                 start_point = Point(20, 20)
-                a = Vector(50, 10)
+                a = Vector(100, 0)
                 b = rotate_vec(a, 90)
                 // b = Vector(50, 10)
-                draw_vec(ctx, a, start_point)
-                draw_vec(ctx, b, start_point)
-                // ctx.strokeStyle='rgb(50,50,0)';
-                // ctx.fillStyle='rgb(50,50,0)';
-                // ctx.lineWidth=2;
-                // // draw the line for the shaft
-                // ctx.moveTo(10,30);
-                // ctx.lineTo(290,30);
-                // // draw the top of the arrow head
-                // ctx.lineTo(285,28);
-                // // draw the curve of the back
-                // ctx.arcTo(289,30, 285,32,8);
-                // // draw the bottom of the arrow head
-                // ctx.lineTo(290,30);
-                // // and make it draw
-                // ctx.stroke();
-                // ctx.fill();
 
+                draw_vec(ctx, a, start_point)
+                // draw_vec(ctx, vec_scalar(normal(a), -20), start_point)
+                // draw_vec(ctx, b, start_point)
 
             }
         }
