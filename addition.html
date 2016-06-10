@@ -111,6 +111,10 @@
             return Vector(ca*vec.x - sa*vec.y, sa*vec.x + ca*vec.y)
         }
 
+        function vec_scalar(vec, scalar){
+            return Vector(vec.x*scalar, vec.y*scalar)
+        }
+
         function to_rad(deg){
             return deg*Math.PI/180
         }
@@ -123,12 +127,21 @@
             ctx.lineWidth = 2;
             // ctx.strokeStyle="red";
             ctx.stroke();
-            draw_point(ctx, end_point, 3)
+            draw_arrow(ctx, normalize(vec), end_point, 10)
         }
 
-        // draw_arrow(ctx, direction, end_point){
-
-        // }
+        function draw_arrow(ctx, direction, end_point, len){
+            left = vec_scalar(rotate_vec(direction, 150), len)
+            right = vec_scalar(rotate_vec(direction, -150), len)
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(end_point.x, end_point.y);
+            ctx.lineTo(end_point.x+left.x, end_point.y+left.y);
+            ctx.moveTo(end_point.x, end_point.y);
+            ctx.lineTo(end_point.x+right.x, end_point.y+right.y);
+            ctx.stroke();
+            ctx.restore();
+        }
 
         function draw_point(ctx, point, radius){
             ctx.beginPath();
