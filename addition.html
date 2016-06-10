@@ -70,7 +70,7 @@
             font-size: 2em;
             font-weight: bold;
         }
-
+        
         canvas {
             display: block;
             margin: 0 auto;
@@ -80,9 +80,100 @@
 
 <body>
     <script type="text/javascript">
+        function Point(x, y) {
+            return {
+                x: x,
+                y: y
+            }
+        }
+
+        function Vector(x, y){
+            return {x:x, y:y}
+        }
+
+        function len_vec(vec){
+            return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+        }
+
+        function normalize(vec){
+            l = len_vec(vec)
+            return Vector(vec.x/l, vec.y/l)
+        }
+
+        function sum_vec(a, b){
+            return Vector(a.x+b.x, a.y+b.y)
+        }
+
+        function rotate_vec(vec, deg){
+            radians = to_rad(deg)
+            ca = Math.cos(radians);
+            sa = Math.sin(radians);
+            return Vector(ca*vec.x - sa*vec.y, sa*vec.x + ca*vec.y)
+        }
+
+        function to_rad(deg){
+            return deg*Math.PI/180
+        }
+
+        function draw_vec(ctx, vec, start_point){
+            end_point = sum_vec(vec, start_point)
+            ctx.beginPath();
+            ctx.moveTo(start_point.x, start_point.y);
+            ctx.lineTo(end_point.x, end_point.y);
+            ctx.lineWidth = 2;
+            // ctx.strokeStyle="red";
+            ctx.stroke();
+            draw_point(ctx, end_point, 3)
+        }
+
+        // draw_arrow(ctx, direction, end_point){
+
+        // }
+
+        function draw_point(ctx, point, radius){
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, true);
+            ctx.stroke();
+        }
+
+        function draw_curve(ctx, start_point, end_point, radius) {
+            draw_point(ctx, Point(20, 100), 2)
+            draw_point(ctx, Point(200, 100), 2)
+            ctx.beginPath();
+            ctx.moveTo(start_point.x, start_point.y);
+            // ctx.quadraticCurveTo(110, -radius, end_point.x, end_point.y);
+            ctx.bezierCurveTo(20,100,200,100,200,20);
+            ctx.stroke();
+        }
+
         window.onload = function() {
             var drawingCanvas = document.getElementById('canvas');
             if (drawingCanvas && drawingCanvas.getContext) {
+                var ctx = drawingCanvas.getContext("2d");
+                // draw_point(ctx, Point(200, 20), 2)
+                // draw_curve(ctx, Point(20, 20), Point(200, 20), -100)
+                start_point = Point(20, 20)
+                a = Vector(50, 10)
+                b = rotate_vec(a, 90)
+                // b = Vector(50, 10)
+                draw_vec(ctx, a, start_point)
+                draw_vec(ctx, b, start_point)
+                // ctx.strokeStyle='rgb(50,50,0)';
+                // ctx.fillStyle='rgb(50,50,0)';
+                // ctx.lineWidth=2;
+                // // draw the line for the shaft
+                // ctx.moveTo(10,30);
+                // ctx.lineTo(290,30);
+                // // draw the top of the arrow head
+                // ctx.lineTo(285,28);
+                // // draw the curve of the back
+                // ctx.arcTo(289,30, 285,32,8);
+                // // draw the bottom of the arrow head
+                // ctx.lineTo(290,30);
+                // // and make it draw
+                // ctx.stroke();
+                // ctx.fill();
+
 
             }
         }
