@@ -174,7 +174,7 @@
             direction = subtraction_vec(end_point, start_point)
             radius = typeof(radius) != 'undefined' ? radius : len_vec(direction) * 0.4;
 
-            // Find point over line (startpoint, endpoint)
+            // Найти точку над отрезком
             function uppoints(ratio, height) {
                 return sum_vec(sum_vec(
                     vec_scalar(normalize(direction), len_vec(direction) * ratio),
@@ -219,7 +219,6 @@
                     function unit2px(unit){
                         return Point(start_point.x+unit_px*unit, start_point.y)
                     }
-                    console.log(unit2px(start), unit2px(stop))
                     draw_curve(ctx, unit2px(start), unit2px(stop))
                 }
             }
@@ -235,6 +234,10 @@
 
             ctx_top.lineWidth = 1.5;
             ctx_bottom.lineWidth = 1.5;
+
+            //Вертикальное смещение обеспечивающие прострастао для рисование стрелок
+            ctx_top.translate(0,100); 
+            ctx_bottom.translate(0,100); 
 
             ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 19), Point(815, 19), 39)
             ruler.add_range(ctx_top, 0, 5)
