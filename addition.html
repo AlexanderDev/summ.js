@@ -85,11 +85,12 @@
             top:2em;
         }
 
-        .overcurve {
-            width:10px; 
+        .curvelabel {
+            width:15px; 
             position:absolute; 
             left:0px;
             top:0px;
+            z-index: 2;
         }
 
     </style>
@@ -209,7 +210,7 @@
             ctx.bezierCurveTo(midpoint1.x, midpoint1.y, midpoint2.x, midpoint2.y, end_point.x, end_point.y);
             ctx.stroke();
 
-            return midpoint
+            return {point:midpoint, radius:radius}
         }
 
         // Элементы страницы
@@ -232,7 +233,8 @@
                     function unit2px(unit){
                         return Point(start_point.x+unit_px*unit, start_point.y)
                     }
-                    draw_curve(ctx, unit2px(start), unit2px(stop))
+                    curve = draw_curve(ctx, unit2px(start), unit2px(stop))
+                    return Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y+VERTICAL_SHIFT-INPUT_HEIGHT/2.0+curve.radius/5.0-18)
                 }
             }
         }
@@ -240,19 +242,28 @@
         function Input(cssclass){
             var input = document.createElement("input");
             input.type = "text";
-            input.className = "overcurve"; 
+            input.className = cssclass; 
             return {
                 append:function(parent){
                     parent.appendChild(input);
                 },
                 remove:function(){
                     input.remove()
+                },
+                set_position:function(point){
+                    input.style.left = point.x + "px";
+                    input.style.top = point.y + "px";
                 }
             }
         }
 
 
+        var VERTICAL_SHIFT = 300
+        var INPUT_WIDTH = 20
+        var INPUT_HEIGHT = 21
+
         window.onload = function() {
+            
             var canvas_top = document.getElementById('canvas_top');
             var canvas_bottom = document.getElementById('canvas_bottom');
 
@@ -262,15 +273,24 @@
             ctx_top.lineWidth = 1.7;
 
             //Вертикальное смещение обеспечивающие прострастао для рисование стрелок
-            ctx_top.translate(0,300); 
-            ctx_bottom.translate(0,300); 
+            ctx_top.translate(0, VERTICAL_SHIFT); 
+            ctx_bottom.translate(0, VERTICAL_SHIFT); 
 
             ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
-            ruler.add_range(ctx_top, 0, 5)
-            ruler.add_range(ctx_top, 0, 20)
+            point = ruler.add_range(ctx_top, 0, 20)
+            point2 = ruler.add_range(ctx_top, 0, 5)
 
-            input = Input("overcurve")
+            input = Input("curvelabel")
             input.append(document.getElementsByClassName("canvas_cont")[0])
+            input.set_position(point)
+
+            input2 = Input("curvelabel")
+            input2.append(document.getElementsByClassName("canvas_cont")[0])
+            input2.set_position(point2)
+
+            // ruler.add_range(ctx_top, 0, 20)
+
+
             // input.remove()
 
         }
@@ -286,7 +306,7 @@
         <div id="content">
             <div class="task"><span>7+14 = 11</span></div>
             <div class="canvas_cont">
-                <!-- <input type="text" class="overcurve" name=""> -->
+                <!-- <input type="text" class="curvelabel" name=""> -->
                 <canvas id="canvas_top" style="z-index: 2;" width="900" height="500"></canvas>
                 <canvas id="canvas_bottom" style="z-index: 1;" width="900" height="500"></canvas>
             </div>
