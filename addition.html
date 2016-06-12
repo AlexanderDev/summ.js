@@ -91,6 +91,18 @@
             z-index: 3;
         }
 
+        div.task span {
+            padding: 5px;
+        }
+
+        .error{
+            color: red;
+        }
+
+        .warning{
+            background-color: #ff9933
+        }
+
     </style>
 </head>
 
@@ -121,7 +133,7 @@
         }
 
         function len_vec(vec) {
-            return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+            return Math.sqrt(vec.x * vec.x + vec.y * vec.y)
         }
 
         function normalize(vec) {
@@ -135,8 +147,8 @@
 
         function rotate_vec(vec, deg) {
             radians = to_rad(deg)
-            ca = Math.cos(radians);
-            sa = Math.sin(radians);
+            ca = Math.cos(radians)
+            sa = Math.sin(radians)
             return Vector(ca * vec.x - sa * vec.y, sa * vec.x + ca * vec.y)
         }
 
@@ -152,37 +164,37 @@
         ///////////////////////////////////////////////////////////////////////////////
         function draw_vec(ctx, vec, start_point) {
             end_point = sum_vec(vec, start_point)
-            ctx.beginPath();
-            ctx.moveTo(start_point.x, start_point.y);
-            ctx.lineTo(end_point.x, end_point.y);
-            ctx.lineWidth = 1.5;
-            // ctx.strokeStyle="red";
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.moveTo(start_point.x, start_point.y)
+            ctx.lineTo(end_point.x, end_point.y)
+            ctx.lineWidth = 1.5
+            // ctx.strokeStyle="red"
+            ctx.stroke()
             draw_arrow(ctx, normalize(vec), end_point, 10)
         }
 
         function draw_arrow(ctx, direction, end_point, len) {
             left = vec_scalar(rotate_vec(direction, 160), len)
             right = vec_scalar(rotate_vec(direction, -160), len)
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(end_point.x, end_point.y);
-            ctx.lineTo(end_point.x + left.x, end_point.y + left.y);
-            ctx.moveTo(end_point.x, end_point.y);
-            ctx.lineTo(end_point.x + right.x, end_point.y + right.y);
-            ctx.stroke();
-            ctx.restore();
+            ctx.save()
+            ctx.beginPath()
+            ctx.moveTo(end_point.x, end_point.y)
+            ctx.lineTo(end_point.x + left.x, end_point.y + left.y)
+            ctx.moveTo(end_point.x, end_point.y)
+            ctx.lineTo(end_point.x + right.x, end_point.y + right.y)
+            ctx.stroke()
+            ctx.restore()
         }
 
         function draw_point(ctx, point, radius) {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, true);
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, true)
+            ctx.stroke()
         }
 
         function draw_curve(ctx, start_point, end_point, radius) {
             direction = subtraction_vec(end_point, start_point)
-            radius = typeof(radius) != 'undefined' ? radius : len_vec(direction) * 0.4;
+            radius = typeof(radius) != 'undefined' ? radius : len_vec(direction) * 0.4
 
             // Найти точку над отрезком
             function uppoints(ratio, height) {
@@ -203,10 +215,10 @@
             // draw_point(ctx, midpoint2, 2)
             // draw_point(ctx, midpoint, 2)
 
-            ctx.beginPath();
-            ctx.moveTo(start_point.x, start_point.y);
-            ctx.bezierCurveTo(midpoint1.x, midpoint1.y, midpoint2.x, midpoint2.y, end_point.x, end_point.y);
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.moveTo(start_point.x, start_point.y)
+            ctx.bezierCurveTo(midpoint1.x, midpoint1.y, midpoint2.x, midpoint2.y, end_point.x, end_point.y)
+            ctx.stroke()
 
             return {point:midpoint, radius:radius}
         }
@@ -221,15 +233,15 @@
             var loaded = false
             var width, height
 
-            img = new Image();
+            img = new Image()
             img.src = img_name
             img.onload = function() {
                 loaded = true
 
-                ctx_img.save();
-                ctx_img.translate(0, VERTICAL_SHIFT); 
+                ctx_img.save()
+                ctx_img.translate(0, VERTICAL_SHIFT) 
                 ctx_img.drawImage(img, 0, 0)
-                ctx_img.restore();
+                ctx_img.restore()
 
                 width = img.width
                 height = img.height
@@ -240,49 +252,55 @@
                     function unit2px(unit){
                         return Point(start_point.x+unit_px*unit, start_point.y)
                     }
-                    ctx.save();
-                    ctx.translate(0, VERTICAL_SHIFT); 
+                    ctx.save()
+                    ctx.translate(0, VERTICAL_SHIFT) 
 
                     curve = draw_curve(ctx, unit2px(start), unit2px(stop))
 
-                    ctx.restore();
+                    ctx.restore()
                     return Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y+VERTICAL_SHIFT-INPUT_HEIGHT/2.0+curve.radius/5.0-18)
                 }
             }
         }
 
         function Input(cssclass){
-            var input = document.createElement("input");
-            input.type = "text";
-            input.className = cssclass; 
+            var input = document.createElement("input")
+            input.type = "text"
+            input.className = cssclass 
             return {
                 append:function(parent){
-                    parent.appendChild(input);
+                    parent.appendChild(input)
                 },
                 remove:function(){
                     input.remove()
                 },
                 set_position:function(point){
-                    input.style.left = point.x + "px";
-                    input.style.top = point.y + "px";
+                    input.style.left = point.x + "px"
+                    input.style.top = point.y + "px"
+                },
+                set_cssclass:function(name){
+                    input.className = cssclass +' '+ name
                 }
             }
         }
 
         function Span(cssclass, value){
-            var span = document.createElement("span");
-            span.className = cssclass; 
-            span.textContent=value;
+            var span = document.createElement("span")
+            span.className = cssclass 
+            span.textContent=value
             return {
                 append:function(parent){
-                    parent.appendChild(span);
+                    parent.appendChild(span)
                     return this
                 },
                 remove:function(){
                     span.remove()
                 },
                 set_value:function(value){
-                    span.textContent=value;
+                    span.textContent=value
+                },
+                set_cssclass:function(name){
+                    span.className = cssclass +' '+ name
                 }
             }
         }
@@ -294,19 +312,19 @@
 
         window.onload = function() {
             
-            var canvas_top = document.getElementById('canvas_top');
-            var canvas_bottom = document.getElementById('canvas_bottom');
+            var canvas_top = document.getElementById('canvas_top')
+            var canvas_bottom = document.getElementById('canvas_bottom')
 
-            var ctx_bottom = canvas_bottom.getContext("2d");
-            var ctx_top = canvas_top.getContext("2d");
+            var ctx_bottom = canvas_bottom.getContext("2d")
+            var ctx_top = canvas_top.getContext("2d")
 
-            ctx_top.lineWidth = 1.7;
+            ctx_top.lineWidth = 1.7
 
             ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
             point = ruler.add_range(ctx_top, 0, 20)
             point2 = ruler.add_range(ctx_top, 0, 5)
 
-            // ctx_top.clearRect(0, 0, 900, 500);
+            // ctx_top.clearRect(0, 0, 900, 500)
 
             input = Input("curvelabel")
             input.append(document.getElementsByClassName("canvas_cont")[0])
@@ -316,14 +334,16 @@
             input2.append(document.getElementsByClassName("canvas_cont")[0])
             input2.set_position(point2)
 
-            clear_ctx(ctx_top)
+            // clear_ctx(ctx_top)
 
             a = Span('', 1).append(document.getElementsByClassName("task")[0])
-            Span('', ' + ').append(document.getElementsByClassName("task")[0])
+            Span('', '+').append(document.getElementsByClassName("task")[0])
             b = Span('', 2).append(document.getElementsByClassName("task")[0])
-            Span('', ' = ').append(document.getElementsByClassName("task")[0])
+            Span('', '=').append(document.getElementsByClassName("task")[0])
             c = Span('', 3).append(document.getElementsByClassName("task")[0])
             b.set_value(4)
+
+            input.set_cssclass('error')
 
             // ruler.add_range(ctx_top, 0, 20)
 
