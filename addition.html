@@ -269,7 +269,25 @@
             }
         }
 
-        //Вертикальное смещение обеспечивающие прострастао для рисование кривых
+        function Span(cssclass, value){
+            var span = document.createElement("span");
+            span.className = cssclass; 
+            span.textContent=value;
+            return {
+                append:function(parent){
+                    parent.appendChild(span);
+                    return this
+                },
+                remove:function(){
+                    span.remove()
+                },
+                set_value:function(value){
+                    span.textContent=value;
+                }
+            }
+        }
+
+        //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
         var INPUT_WIDTH = 20
         var INPUT_HEIGHT = 21
@@ -300,6 +318,13 @@
 
             clear_ctx(ctx_top)
 
+            a = Span('', 1).append(document.getElementsByClassName("task")[0])
+            Span('', ' + ').append(document.getElementsByClassName("task")[0])
+            b = Span('', 2).append(document.getElementsByClassName("task")[0])
+            Span('', ' = ').append(document.getElementsByClassName("task")[0])
+            c = Span('', 3).append(document.getElementsByClassName("task")[0])
+            b.set_value(4)
+
             // ruler.add_range(ctx_top, 0, 20)
 
 
@@ -316,7 +341,8 @@
             <hr>
         </div>
         <div id="content">
-            <div class="task"><span>7+14 = 11</span></div>
+            <div class="task">
+            </div>
             <div class="canvas_cont" style="width:900px; height:500px;" >
                 <!-- <input type="text" class="curvelabel" name=""> -->
                 <canvas id="canvas_top" style="z-index: 2;" width="900" height="500"></canvas>
