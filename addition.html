@@ -280,6 +280,13 @@
                 },
                 set_cssclass:function(name){
                     input.className = cssclass +' '+ name
+                },
+                onchange:function(callback){
+                    var obj = this
+                    input.onchange = function(){callback(obj)}
+                },
+                value:function(){
+                    return input.value
                 }
             }
         }
@@ -315,7 +322,6 @@
                     this.transitiontable[signal] = state
                 },
                 jump:function(signal){
-                    console.log('name:', name, 'transitiontable:', this.transitiontable)
                     next = this.transitiontable[signal]
                     if(next != null)
                         next.handler()
@@ -329,8 +335,6 @@
             current_state.handler()
             return {
                 handle:function(signal){
-                    // console.log('handle', signal)
-                    // console.log(current_state.name)
                     next = current_state.jump(signal)
                     if(next != null){
                         current_state = next
@@ -368,6 +372,7 @@
             input2 = Input("curvelabel")
             input2.append(document.getElementsByClassName("canvas_cont")[0])
             input2.set_position(point2)
+            input2.onchange(function(input){console.log(input.value())})
 
             // clear_ctx(ctx_top)
 
@@ -380,28 +385,16 @@
 
             input.set_cssclass('error')
 
-            s1 = State('state1', function(){ console.log('state1') })
-            s2 = State('state2', function(){ console.log('state2') })
+
+            s1 = State('init_state', function(){ })
+            
+            s2 = State('state2', function(){  })
 
             s1.transition('true', s2)
             s1.transition('false', s1)
 
             FSM(s1, s2).handle('true').handle('false').handle('false').handle('false')
             // ruler.add_range(ctx_top, 0, 20)
-            // function Obj(arg){
-            //     return {
-            //         s:arg,
-            //         print:function(){
-            //             console.log(this.s)
-            //         }
-            //     }
-            // }
-
-            // obj1 = Obj('1')
-            // obj1.print()
-            // obj2 = Obj('2')
-            // obj2.print()
-            // obj1.print()
 
             // input.remove()
 
