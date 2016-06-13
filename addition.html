@@ -291,9 +291,8 @@
             }
         }
 
-        function Span(cssclass, value){
+        function Span(value){
             var span = document.createElement("span")
-            span.className = cssclass 
             span.textContent=value
             return {
                 append:function(parent){
@@ -344,13 +343,26 @@
             }
         }
 
+        // Основное табло
+        ///////////////////////////////////////////////////////////////////////////////
+        function Title(parent_class){
+            span = Span().append(document.getElementsByClassName(parent_class)[0])
+            return{
+                set:function(title){
+                    span.set_value(title)
+                }
+            }
+        }
+
         //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
         var INPUT_WIDTH = 20
         var INPUT_HEIGHT = 21
 
         window.onload = function() {
-            
+            title = Title("title")
+
+
             var canvas_top = document.getElementById('canvas_top')
             var canvas_bottom = document.getElementById('canvas_bottom')
 
@@ -376,24 +388,23 @@
 
             // clear_ctx(ctx_top)
 
-            a = Span('', 1).append(document.getElementsByClassName("task")[0])
-            Span('', '+').append(document.getElementsByClassName("task")[0])
-            b = Span('', 2).append(document.getElementsByClassName("task")[0])
-            Span('', '=').append(document.getElementsByClassName("task")[0])
-            c = Span('', 3).append(document.getElementsByClassName("task")[0])
-            b.set_value(4)
-
+            a = Span(1).append(document.getElementsByClassName("task")[0])
+            Span('+').append(document.getElementsByClassName("task")[0])
+            b = Span(2).append(document.getElementsByClassName("task")[0])
+            Span('=').append(document.getElementsByClassName("task")[0])
+            c = Span(3).append(document.getElementsByClassName("task")[0])
+    
             input.set_cssclass('error')
 
 
-            s1 = State('init_state', function(){ })
-            
-            s2 = State('state2', function(){  })
+            init = State('init', function(){title.set('Сложите два числа')})
+            error = State('input error', function(){title.set('Ошибка')})
 
-            s1.transition('true', s2)
-            s1.transition('false', s1)
 
-            FSM(s1, s2).handle('true').handle('false').handle('false').handle('false')
+            // s1.transition('true', s2)
+            // s1.transition('false', s1)
+
+            FSM(init, error)
             // ruler.add_range(ctx_top, 0, 20)
 
             // input.remove()
@@ -403,7 +414,7 @@
     <div class="maket">
         <div class="header">
             <div id="wrapper">
-                <div>Сложите два числа</div>
+                <div class="title"></div>
             </div>
             <!-- Horisontal line -->
             <hr>
