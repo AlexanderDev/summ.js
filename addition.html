@@ -83,12 +83,15 @@
             top:2em;
         }
 
-        .curvelabel {
-            width:15px; 
+        .absolute{
             position:absolute; 
             left:0px;
             top:0px;
             z-index: 3;
+        }
+
+        .curvelabel {
+            width:15px; 
         }
 
         div.task span {
@@ -256,11 +259,17 @@
                     ctx.translate(0, VERTICAL_SHIFT) 
 
                     curve = draw_curve(ctx, unit2px(start), unit2px(stop))
-
+                    curve.point.y += VERTICAL_SHIFT
                     ctx.restore()
-                    return Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y+VERTICAL_SHIFT-INPUT_HEIGHT/2.0+curve.radius/5.0-18)
+                    return curve
                 }
             }
+        }
+
+        //Земеняет элемент1 на элемент2
+        function swap_elements(elem1, elem2){
+            elem1.parentNode.insertBefore(elem2, elem1)
+            elem1.remove()
         }
 
         function Input(cssclass){
@@ -287,6 +296,9 @@
                 },
                 value:function(){
                     return input.value
+                },
+                dom:function(){
+                    return input
                 }
             }
         }
@@ -305,8 +317,15 @@
                 set_value:function(value){
                     span.textContent=value
                 },
+                set_position:function(point){
+                    span.style.left = point.x + "px"
+                    span.style.top = point.y + "px"
+                },
                 set_cssclass:function(name){
-                    span.className = cssclass +' '+ name
+                    span.className = name
+                },
+                dom:function(){
+                    return span
                 }
             }
         }
@@ -409,6 +428,9 @@
             b_span = Span().append(document.getElementsByClassName("task")[0])
             Span('=').append(document.getElementsByClassName("task")[0])
             c_span = Span().append(document.getElementsByClassName("task")[0])
+
+            var a_label = Span()
+            var b_label = Span()
     
             // input.set_cssclass('error')
 
@@ -417,21 +439,80 @@
                 exp.generate()
                 a_span.set_value(exp.a)
                 b_span.set_value(exp.b)
-                c_span.set_value(exp.c)
+                c_span.set_value('?')
+
                 title.set('Введите первое число')
-                point = ruler.add_range(ctx_top, 0, exp.a)
-                input = Input("curvelabel")
+
+                curve = ruler.add_range(ctx_top, 0, exp.a)
+
+                input = Input("curvelabel absolute")
                 input.append(document.getElementsByClassName("canvas_cont")[0])
-                input.set_position(point)
+                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
+
+                input.onchange(function(input){
+                    if(input.value() != exp.a){
+                        input.set_cssclass('error')
+                        a_span.set_cssclass('warning')
+
+                        fsm.handle('error')
+                    }else{
+                        //clear css classname
+                        input.set_cssclass('')
+                        a_span.set_cssclass('')
+
+                        a_label.set_value(exp.a)
+                        a_label.set_cssclass('absolute')
+                        a_label.set_position(curve.point)
+
+                        swap_elements(input.dom(), a_label.dom())
+                        
+
+                        fsm.handle('a right')
+                    }   
+                })
 
             })
-            error = State('input error', function(){title.set('Ошибка')})
+
+            b_input = State('b_input', function(){
+                title.set('Введите второе число')
+                curve = ruler.add_range(ctx_top, exp.a, exp.c)
+
+                input = Input("curvelabel absolute")
+                input.append(document.getElementsByClassName("canvas_cont")[0])
+                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
+
+                input.onchange(function(input){
+                    if(input.value() != exp.b){
+                        input.set_cssclass('error')
+                        b_span.set_cssclass('warning')
+
+                        fsm.handle('error')
+                    }else{
+                        //clear css classname
+                        input.set_cssclass('')
+                        b_span.set_cssclass('')
+
+                        b_label.set_value(exp.b)
+                        b_label.set_cssclass('absolute')
+                        b_label.set_position(curve.point)
+                        swap_elements(input.dom(), b_label.dom())
+
+                        // fsm.handle('a right')
+                    }   
+                })
+            })
+
+            error = State('input error', function(){
+                title.set('Ошибка попробуй еще раз')
+            })
+
+            init.transition('a right', b_input)
+            init.transition('error', error)
+            
+            error.transition('a right', b_input)
 
 
-            // s1.transition('true', s2)
-            // s1.transition('false', s1)
-
-            FSM(init, error)
+            var fsm = FSM(init, b_input, error)
             // ruler.add_range(ctx_top, 0, 20)
 
             // input.remove()
