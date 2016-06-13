@@ -305,6 +305,41 @@
             }
         }
 
+        function State(name, handler){
+            return {
+                transitiontable:{},
+                handler:handler,
+                name:name
+                ,
+                transition:function(signal, state){
+                    this.transitiontable[signal] = state
+                },
+                jump:function(signal){
+                    console.log('name:', name, 'transitiontable:', this.transitiontable)
+                    next = this.transitiontable[signal]
+                    if(next != null)
+                        next.handler()
+                        return next
+                }
+            }
+        }
+
+        function FSM(){
+            current_state = arguments[0]
+            current_state.handler()
+            return {
+                handle:function(signal){
+                    // console.log('handle', signal)
+                    // console.log(current_state.name)
+                    next = current_state.jump(signal)
+                    if(next != null){
+                        current_state = next
+                    }
+                    return this
+                }
+            }
+        }
+
         //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
         var INPUT_WIDTH = 20
@@ -345,8 +380,28 @@
 
             input.set_cssclass('error')
 
-            // ruler.add_range(ctx_top, 0, 20)
+            s1 = State('state1', function(){ console.log('state1') })
+            s2 = State('state2', function(){ console.log('state2') })
 
+            s1.transition('true', s2)
+            s1.transition('false', s1)
+
+            FSM(s1, s2).handle('true').handle('false').handle('false').handle('false')
+            // ruler.add_range(ctx_top, 0, 20)
+            // function Obj(arg){
+            //     return {
+            //         s:arg,
+            //         print:function(){
+            //             console.log(this.s)
+            //         }
+            //     }
+            // }
+
+            // obj1 = Obj('1')
+            // obj1.print()
+            // obj2 = Obj('2')
+            // obj2.print()
+            // obj1.print()
 
             // input.remove()
 
