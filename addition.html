@@ -329,6 +329,34 @@
             }
         }
 
+        // Заглавие
+        function Title(parent_class){
+            span = Span().append(document.getElementsByClassName(parent_class)[0])
+            return{
+                set:function(title){
+                    span.set_value(title)
+                }
+            }
+        }
+
+        function Expression(){
+            return {
+                a:0,
+                b:0,
+                c:0,
+                generate:function(){
+                    this.a = getRandomInt(6, 9)
+                    this.c = getRandomInt(11, 14)
+                    this.b = this.c - this.a
+                }
+            }
+        }
+
+        function getRandomInt(min, max){
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        //Конечный автомат
         function FSM(){
             current_state = arguments[0]
             current_state.handler()
@@ -343,16 +371,6 @@
             }
         }
 
-        // Основное табло
-        ///////////////////////////////////////////////////////////////////////////////
-        function Title(parent_class){
-            span = Span().append(document.getElementsByClassName(parent_class)[0])
-            return{
-                set:function(title){
-                    span.set_value(title)
-                }
-            }
-        }
 
         //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
@@ -361,7 +379,7 @@
 
         window.onload = function() {
             title = Title("title")
-
+            exp = Expression()
 
             var canvas_top = document.getElementById('canvas_top')
             var canvas_bottom = document.getElementById('canvas_bottom')
@@ -388,16 +406,23 @@
 
             // clear_ctx(ctx_top)
 
-            a = Span(1).append(document.getElementsByClassName("task")[0])
+            a = Span().append(document.getElementsByClassName("task")[0])
             Span('+').append(document.getElementsByClassName("task")[0])
-            b = Span(2).append(document.getElementsByClassName("task")[0])
+            b = Span().append(document.getElementsByClassName("task")[0])
             Span('=').append(document.getElementsByClassName("task")[0])
-            c = Span(3).append(document.getElementsByClassName("task")[0])
+            c = Span().append(document.getElementsByClassName("task")[0])
     
             input.set_cssclass('error')
 
 
-            init = State('init', function(){title.set('Сложите два числа')})
+            init = State('init', function(){
+                exp.generate()
+                a.set_value(exp.a)
+                b.set_value(exp.b)
+                c.set_value(exp.c)
+                title.set('Введите первое число')
+
+            })
             error = State('input error', function(){title.set('Ошибка')})
 
 
