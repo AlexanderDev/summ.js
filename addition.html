@@ -390,37 +390,39 @@
             ctx_top.lineWidth = 1.7
 
             ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
-            point = ruler.add_range(ctx_top, 0, 20)
-            point2 = ruler.add_range(ctx_top, 0, 5)
 
             // ctx_top.clearRect(0, 0, 900, 500)
 
-            input = Input("curvelabel")
-            input.append(document.getElementsByClassName("canvas_cont")[0])
-            input.set_position(point)
+            // input = Input("curvelabel")
+            // input.append(document.getElementsByClassName("canvas_cont")[0])
+            // input.set_position(point)
 
-            input2 = Input("curvelabel")
-            input2.append(document.getElementsByClassName("canvas_cont")[0])
-            input2.set_position(point2)
-            input2.onchange(function(input){console.log(input.value())})
+            // input2 = Input("curvelabel")
+            // input2.append(document.getElementsByClassName("canvas_cont")[0])
+            // input2.set_position(point2)
+            // input2.onchange(function(input){console.log(input.value())})
 
             // clear_ctx(ctx_top)
 
-            a = Span().append(document.getElementsByClassName("task")[0])
+            a_span = Span().append(document.getElementsByClassName("task")[0])
             Span('+').append(document.getElementsByClassName("task")[0])
-            b = Span().append(document.getElementsByClassName("task")[0])
+            b_span = Span().append(document.getElementsByClassName("task")[0])
             Span('=').append(document.getElementsByClassName("task")[0])
-            c = Span().append(document.getElementsByClassName("task")[0])
+            c_span = Span().append(document.getElementsByClassName("task")[0])
     
-            input.set_cssclass('error')
+            // input.set_cssclass('error')
 
 
             init = State('init', function(){
                 exp.generate()
-                a.set_value(exp.a)
-                b.set_value(exp.b)
-                c.set_value(exp.c)
+                a_span.set_value(exp.a)
+                b_span.set_value(exp.b)
+                c_span.set_value(exp.c)
                 title.set('Введите первое число')
+                point = ruler.add_range(ctx_top, 0, exp.a)
+                input = Input("curvelabel")
+                input.append(document.getElementsByClassName("canvas_cont")[0])
+                input.set_position(point)
 
             })
             error = State('input error', function(){title.set('Ошибка')})
