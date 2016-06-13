@@ -231,7 +231,7 @@
         }
 
         // Элементы страницы
-        ///////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////
         function Ruler(ctx_img, img_name, start_point, end_point, unit_px) {
             var loaded = false
             var width, height
@@ -272,63 +272,74 @@
             elem1.remove()
         }
 
-        function Input(cssclass){
-            var input = document.createElement("input")
-            input.type = "text"
-            input.className = cssclass 
-            return {
-                append:function(parent){
-                    parent.appendChild(input)
-                },
-                remove:function(){
-                    input.remove()
-                },
-                set_position:function(point){
-                    input.style.left = point.x + "px"
-                    input.style.top = point.y + "px"
-                },
-                set_cssclass:function(name){
-                    input.className = cssclass +' '+ name
-                },
-                onchange:function(callback){
-                    var obj = this
-                    input.onchange = function(){callback(obj)}
-                },
-                value:function(){
-                    return input.value
-                },
-                dom:function(){
-                    return input
+        function extend(object)
+        {
+            var mixins = Array.prototype.slice.call(arguments, 1);
+            for (var i = 0; i < mixins.length; ++i)
+            {
+                for (var prop in mixins[i])
+                {
+                    if (typeof object.prototype[prop] === "undefined")
+                    {
+                        object.prototype[prop] = mixins[i][prop];
+                    }
                 }
             }
         }
 
-        function Span(value){
-            var span = document.createElement("span")
-            span.textContent=value
-            return {
+        //Примесь
+        //////////////////////////////////////////////////////////////////////////////
+        var Element = {
                 append:function(parent){
-                    parent.appendChild(span)
+                    parent.appendChild(this.element)
                     return this
                 },
                 remove:function(){
-                    span.remove()
-                },
-                set_value:function(value){
-                    span.textContent=value
+                    this.element.remove()
                 },
                 set_position:function(point){
-                    span.style.left = point.x + "px"
-                    span.style.top = point.y + "px"
+                    this.element.style.left = point.x + "px"
+                    this.element.style.top = point.y + "px"
                 },
                 set_cssclass:function(name){
-                    span.className = name
+                    this.element.className = (typeof(this.cssclass) != 'undefined' ? this.cssclass : '')+' '+name
+                },
+                onchange:function(callback){
+                    var obj = this
+                    this.element.onchange = function(){callback(obj)}
+                },
+                value:function(){
+                    return this.element.value
                 },
                 dom:function(){
-                    return span
+                    return this.element
                 }
+        }
+
+        function Input(cssclass){
+            var input = document.createElement("input")
+            input.type = "text"
+            input.className = cssclass
+
+            this.cssclass = cssclass
+            this.element = input
+            this.onchange = function(callback){
+                var obj = this
+                input.onchange = function(){callback(obj)}
             }
         }
+        extend(Input, Element);
+
+
+        function Span(value){
+            var span = document.createElement("span")
+            span.textContent = value
+            this.element = span
+            this.set_value = function(value){
+                span.textContent=value
+            }
+        }
+        extend(Span, Element);
 
         function State(name, handler){
             return {
@@ -350,25 +361,22 @@
 
         // Заглавие
         function Title(parent_class){
-            span = Span().append(document.getElementsByClassName(parent_class)[0])
-            return{
-                set:function(title){
-                    span.set_value(title)
-                }
+            span = new Span().append(document.getElementsByClassName(parent_class)[0])
+            this.set = function(title){
+                span.set_value(title)
             }
         }
 
         function Expression(){
-            return {
-                a:0,
-                b:0,
-                c:0,
-                generate:function(){
+                this.a = 0
+                this.b = 0
+                this.c = 0
+                this.generate = function(){
                     this.a = getRandomInt(6, 9)
                     this.c = getRandomInt(11, 14)
                     this.b = this.c - this.a
                 }
-            }
+
         }
 
         function getRandomInt(min, max){
@@ -379,15 +387,15 @@
         function FSM(){
             current_state = arguments[0]
             current_state.handler()
-            return {
-                handle:function(signal){
+
+                this.handle = function(signal){
                     next = current_state.jump(signal)
                     if(next != null){
                         current_state = next
                     }
                     return this
                 }
-            }
+
         }
 
 
@@ -397,8 +405,8 @@
         var INPUT_HEIGHT = 21
 
         window.onload = function() {
-            title = Title("title")
-            exp = Expression()
+            title = new Title("title")
+            exp = new Expression()
 
             var canvas_top = document.getElementById('canvas_top')
             var canvas_bottom = document.getElementById('canvas_bottom')
@@ -412,31 +420,22 @@
 
             // ctx_top.clearRect(0, 0, 900, 500)
 
-            // input = Input("curvelabel")
-            // input.append(document.getElementsByClassName("canvas_cont")[0])
-            // input.set_position(point)
-
-            // input2 = Input("curvelabel")
-            // input2.append(document.getElementsByClassName("canvas_cont")[0])
-            // input2.set_position(point2)
-            // input2.onchange(function(input){console.log(input.value())})
-
             // clear_ctx(ctx_top)
 
-            a_span = Span().append(document.getElementsByClassName("task")[0])
-            Span('+').append(document.getElementsByClassName("task")[0])
-            b_span = Span().append(document.getElementsByClassName("task")[0])
-            Span('=').append(document.getElementsByClassName("task")[0])
-            c_span = Span().append(document.getElementsByClassName("task")[0])
+            a_span = new Span().append(document.getElementsByClassName("task")[0])
+            new Span('+').append(document.getElementsByClassName("task")[0])
+            b_span = new Span().append(document.getElementsByClassName("task")[0])
+            new Span('=').append(document.getElementsByClassName("task")[0])
+            c_span = new Span().append(document.getElementsByClassName("task")[0])
 
-            var a_label = Span()
-            var b_label = Span()
+            var a_label = new Span()
+            var b_label = new Span()
     
             // input.set_cssclass('error')
 
 
             init = State('init', function(){
-                exp.generate()
+                exp.generate(new Span('+'))
                 a_span.set_value(exp.a)
                 b_span.set_value(exp.b)
                 c_span.set_value('?')
@@ -445,7 +444,7 @@
 
                 curve = ruler.add_range(ctx_top, 0, exp.a)
 
-                input = Input("curvelabel absolute")
+                input = new Input("curvelabel absolute")
                 input.append(document.getElementsByClassName("canvas_cont")[0])
                 input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
 
@@ -477,7 +476,7 @@
                 title.set('Введите второе число')
                 curve = ruler.add_range(ctx_top, exp.a, exp.c)
 
-                input = Input("curvelabel absolute")
+                input = new Input("curvelabel absolute")
                 input.append(document.getElementsByClassName("canvas_cont")[0])
                 input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
 
@@ -508,14 +507,15 @@
 
             init.transition('a right', b_input)
             init.transition('error', error)
+
+            b_input.transition('b right', error)
+            b_input.transition('error', error)
             
             error.transition('a right', b_input)
+            error.transition('b right', b_input)
 
 
-            var fsm = FSM(init, b_input, error)
-            // ruler.add_range(ctx_top, 0, 20)
-
-            // input.remove()
+            var fsm = new FSM(init, b_input, error)
 
         }
     </script>
