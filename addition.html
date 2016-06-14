@@ -66,11 +66,6 @@
             overflow: auto;
         }
         
-        div.task span {
-            font-size: 2em;
-            font-weight: bold;
-        }
-        
         canvas {
             position:absolute;
             left:0px;
@@ -90,8 +85,27 @@
             z-index: 3;
         }
 
-        input {
-            width:15px; 
+        input[type="text"]{
+            text-align: center; 
+            /* css 3 */
+            border-radius:2px;
+            /* mozilla */
+            -moz-border-radius:2px;
+            /* webkit */
+            -webkit-border-radius:2px;
+            border: solid 1px #8c8c8c;
+        }
+
+        .task input[type="text"]{
+            font-size: 2em;
+            font-weight: bold; 
+            width:45px;
+        }
+
+        .canvas_cont input[type="text"]{
+            font-size:1.2em;
+            font-weight: bold;
+            width:26px; 
         }
 
         div.task {
@@ -99,7 +113,14 @@
         }
 
         div.task span {
+            font-size: 2em;
+            font-weight: bold;
             padding: 5px;
+        }
+
+        .canvas_cont span{
+            font-size:1.2em;
+            font-weight: bold; 
         }
 
         .error{
@@ -109,6 +130,7 @@
         .warning{
             background-color: #ff9933
         }
+
 
     </style>
 </head>
@@ -447,7 +469,8 @@
             var ctx_bottom = canvas_bottom.getContext("2d")
             var ctx_top = canvas_top.getContext("2d")
 
-            ctx_top.lineWidth = 1.7
+            ctx_top.lineWidth = 2
+            ctx_top.strokeStyle="#5500ff"
 
             var ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
 
@@ -514,33 +537,35 @@
                 eq_span.append(task_element)
                 c_span.append(task_element)
 
-                console.log('init state')
                 fsm.handle('check a')
 
             })
 
             a_check_state = new State(function(){
                 input_label('Введите первое число', a_span, {a:0, b:exp.a}, 'a right')
-                console.log('a state')
             })
 
             b_check_state = new State(function(){
                 input_label('Введите второе число', b_span, {a:exp.a, b:exp.c}, 'b right')
-                console.log('b state')
             })
 
             c_check_state = new State(function(){
                 title.set('Введите сумму двух чисел')
-                console.log('c state')
 
+                // var answ_span = new Span()
                 input = InputCheck("", exp.c, 
                     function(){
                         input.set_cssclass('error')
                         fsm.handle('error')
                     },
                     function(){
+                        title.set('Правильно!')
                         input.set_cssclass('')
-                        fsm.handle('c right')
+                        c_span.set_value(exp.c)
+                        setTimeout(function(){
+                            fsm.handle('c right')
+                        }, 1700);
+                        swap_elements(input.dom(), c_span.dom())
                     })
 
                 swap_elements(c_span.dom(), input.dom())
@@ -549,7 +574,7 @@
             })
 
             error = new State(function(){
-                title.set('Ошибка попробуй еще раз')
+                title.set('Ошибка! Введите верное число')
             })
 
             init.transition('check a', a_check_state)
