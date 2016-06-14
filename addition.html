@@ -94,6 +94,10 @@
             width:15px; 
         }
 
+        div.task {
+            height: 2.5em;
+        }
+
         div.task span {
             padding: 5px;
         }
@@ -287,6 +291,23 @@
             }
         }
 
+        function remove_child(parent){
+            function allowed(element, tagname){
+                return (element.nodeName == tagname.toUpperCase())
+            }
+
+            var children = parent.childNodes;
+            var tags = Array.prototype.slice.call(arguments, 1);
+            for (var i = 0; i < tags.length; ++i)
+            {
+                for(child in children){
+                    if(allowed(children[child], tags[i]))
+                        parent.removeChild(children[child])
+                }
+            }                     
+        }
+
+
         //Примесь
         //////////////////////////////////////////////////////////////////////////////
         var Element = {
@@ -341,22 +362,18 @@
         }
         extend(Span, Element);
 
-        function State(name, handler){
-            return {
-                transitiontable:{},
-                handler:handler,
-                name:name
-                ,
-                transition:function(signal, state){
+        function State(handler){
+                this.transitiontable = {}
+                this.handler = handler
+                this.transition = function(signal, state){
                     this.transitiontable[signal] = state
                 },
-                jump:function(signal){
-                    next = this.transitiontable[signal]
+                this.jump = function(signal){
+                    var next = this.transitiontable[signal]
                     if(next != null)
                         next.handler()
                         return next
                 }
-            }
         }
 
         // Заглавие
@@ -376,7 +393,6 @@
                     this.c = getRandomInt(11, 14)
                     this.b = this.c - this.a
                 }
-
         }
 
         function getRandomInt(min, max){
@@ -385,15 +401,18 @@
 
         //Конечный автомат
         function FSM(){
-            current_state = arguments[0]
-            current_state.handler()
+                this.current_state = arguments[0]
 
                 this.handle = function(signal){
-                    next = current_state.jump(signal)
+                    next = this.current_state.jump(signal)
                     if(next != null){
-                        current_state = next
+                        this.current_state = next
                     }
                     return this
+                }
+
+                this.start = function(){
+                    this.current_state.handler()
                 }
 
         }
@@ -405,8 +424,8 @@
         var INPUT_HEIGHT = 21
 
         window.onload = function() {
-            title = new Title("title")
-            exp = new Expression()
+            var title = new Title("title")
+            var exp = new Expression()
 
             var canvas_top = document.getElementById('canvas_top')
             var canvas_bottom = document.getElementById('canvas_bottom')
@@ -416,107 +435,104 @@
 
             ctx_top.lineWidth = 1.7
 
-            ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
-
-            // ctx_top.clearRect(0, 0, 900, 500)
-
-            // clear_ctx(ctx_top)
-
-            a_span = new Span().append(document.getElementsByClassName("task")[0])
-            new Span('+').append(document.getElementsByClassName("task")[0])
-            b_span = new Span().append(document.getElementsByClassName("task")[0])
-            new Span('=').append(document.getElementsByClassName("task")[0])
-            c_span = new Span().append(document.getElementsByClassName("task")[0])
-
-            var a_label = new Span()
-            var b_label = new Span()
-    
-            // input.set_cssclass('error')
+            var ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
 
 
-            init = State('init', function(){
-                exp.generate(new Span('+'))
+            var a_span = new Span()
+            var op_span = new Span('+')
+            var b_span = new Span()
+            var eq_span = new Span('=')
+            var c_span = new Span()
+
+            function input_check(title_txt, expr_elem, range, signal){
+                title.set(title_txt)
+                curve = ruler.add_range(ctx_top, range.a, range.b)
+
+                var label = new Span()
+                input = new Input("curvelabel absolute")
+                input.append(document.getElementsByClassName("canvas_cont")[0])
+                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
+
+                input.onchange(function(input){
+                    if(input.value() != (range.b-range.a)){
+                        input.set_cssclass('error')
+                        expr_elem.set_cssclass('warning')
+
+                        fsm.handle('error')
+                    }else{
+                        //clear css classname
+                        input.set_cssclass('')
+                        expr_elem.set_cssclass('')
+
+                        label.set_value(range.b-range.a)
+                        label.set_cssclass('absolute')
+                        label.set_position(curve.point)
+                        swap_elements(input.dom(), label.dom())
+
+                        fsm.handle(signal)
+                    }   
+                })
+            }
+
+            function clear_page(){
+                //Clear canvas
+                clear_ctx(ctx_top)
+                a_span.remove()
+                op_span.remove()
+                b_span.remove()
+                eq_span.remove()
+                c_span.remove()
+
+                var parent = document.getElementsByClassName('canvas_cont')[0]
+                remove_child(parent, 'span')
+                remove_child(parent, 'input')
+
+            }
+
+            init = new State(function(){
+                exp.generate()
                 a_span.set_value(exp.a)
                 b_span.set_value(exp.b)
                 c_span.set_value('?')
 
-                title.set('Введите первое число')
+                clear_page()
 
-                curve = ruler.add_range(ctx_top, 0, exp.a)
+                task_element = document.getElementsByClassName("task")[0]
+                a_span.append(task_element)
+                op_span.append(task_element)
+                b_span.append(task_element)
+                eq_span.append(task_element)
+                c_span.append(task_element)
 
-                input = new Input("curvelabel absolute")
-                input.append(document.getElementsByClassName("canvas_cont")[0])
-                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
-
-                input.onchange(function(input){
-                    if(input.value() != exp.a){
-                        input.set_cssclass('error')
-                        a_span.set_cssclass('warning')
-
-                        fsm.handle('error')
-                    }else{
-                        //clear css classname
-                        input.set_cssclass('')
-                        a_span.set_cssclass('')
-
-                        a_label.set_value(exp.a)
-                        a_label.set_cssclass('absolute')
-                        a_label.set_position(curve.point)
-
-                        swap_elements(input.dom(), a_label.dom())
-                        
-
-                        fsm.handle('a right')
-                    }   
-                })
+                fsm.handle('check a')
 
             })
 
-            b_input = State('b_input', function(){
-                title.set('Введите второе число')
-                curve = ruler.add_range(ctx_top, exp.a, exp.c)
-
-                input = new Input("curvelabel absolute")
-                input.append(document.getElementsByClassName("canvas_cont")[0])
-                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
-
-                input.onchange(function(input){
-                    if(input.value() != exp.b){
-                        input.set_cssclass('error')
-                        b_span.set_cssclass('warning')
-
-                        fsm.handle('error')
-                    }else{
-                        //clear css classname
-                        input.set_cssclass('')
-                        b_span.set_cssclass('')
-
-                        b_label.set_value(exp.b)
-                        b_label.set_cssclass('absolute')
-                        b_label.set_position(curve.point)
-                        swap_elements(input.dom(), b_label.dom())
-
-                        // fsm.handle('a right')
-                    }   
-                })
+            a_check_state = new State(function(){
+                input_check('Введите первое число', a_span, {a:0, b:exp.a}, 'a right')
             })
 
-            error = State('input error', function(){
+            b_check_state = new State(function(){
+                input_check('Введите второе число', b_span, {a:exp.a, b:exp.c}, 'b right')
+            })
+
+            error = new State(function(){
                 title.set('Ошибка попробуй еще раз')
             })
 
-            init.transition('a right', b_input)
-            init.transition('error', error)
+            init.transition('check a', a_check_state)
 
-            b_input.transition('b right', error)
-            b_input.transition('error', error)
+            a_check_state.transition('a right', b_check_state)
+            a_check_state.transition('error', error)
+
+            b_check_state.transition('b right', error)
+            b_check_state.transition('error', error)
             
-            error.transition('a right', b_input)
-            error.transition('b right', b_input)
+            error.transition('a right', b_check_state)
+            error.transition('b right', b_check_state)
 
-
-            var fsm = new FSM(init, b_input, error)
-
+            var fsm = new FSM(init, a_check_state, b_check_state, error)
+            fsm.start()
         }
     </script>
     <div class="maket">
