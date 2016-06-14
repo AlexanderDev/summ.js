@@ -90,7 +90,7 @@
             z-index: 3;
         }
 
-        .curvelabel {
+        input {
             width:15px; 
         }
 
@@ -272,8 +272,7 @@
 
         //Земеняет элемент1 на элемент2
         function swap_elements(elem1, elem2){
-            elem1.parentNode.insertBefore(elem2, elem1)
-            elem1.remove()
+            elem1.parentNode.replaceChild(elem2, elem1)
         }
 
         function extend(object)
@@ -295,14 +294,15 @@
             function allowed(element, tagname){
                 return (element.nodeName == tagname.toUpperCase())
             }
-
             var children = parent.childNodes;
+            var elements = Array.prototype.slice.call(children,0);     
             var tags = Array.prototype.slice.call(arguments, 1);
             for (var i = 0; i < tags.length; ++i)
             {
-                for(child in children){
-                    if(allowed(children[child], tags[i]))
-                        parent.removeChild(children[child])
+                for (var index = 0, len = elements.length; index < len; index++) {
+                    if(allowed(elements[index], tags[i])){
+                        elements[index].parentNode.removeChild(elements[index]);
+                    }
                 }
             }                     
         }
@@ -362,18 +362,16 @@
         }
         extend(Span, Element);
 
-        function State(handler){
-                this.transitiontable = {}
-                this.handler = handler
-                this.transition = function(signal, state){
-                    this.transitiontable[signal] = state
-                },
-                this.jump = function(signal){
-                    var next = this.transitiontable[signal]
-                    if(next != null)
-                        next.handler()
-                        return next
-                }
+        function InputCheck(cssclass, right, error, success){
+            input = new Input(cssclass)
+            input.onchange(function(input){
+                if(input.value() != right){
+                    error()
+                }else{
+                    success()
+                }   
+            })
+            return input
         }
 
         // Заглавие
@@ -417,12 +415,28 @@
 
         }
 
+        function State(handler){
+                this.transitiontable = {}
+                this.handler = handler
+                this.transition = function(signal, state){
+                    this.transitiontable[signal] = state
+                },
+                this.jump = function(signal){
+                    var next = this.transitiontable[signal]
+                    if(next != null)
+                        setTimeout(next.handler, 0);
+                        return next
+                }
+        }
+
 
         //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
         var INPUT_WIDTH = 20
         var INPUT_HEIGHT = 21
 
+        //Main
+        //////////////////////////////////////////////////////////////////////////////
         window.onload = function() {
             var title = new Title("title")
             var exp = new Expression()
@@ -437,30 +451,25 @@
 
             var ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39)
 
-
             var a_span = new Span()
             var op_span = new Span('+')
             var b_span = new Span()
             var eq_span = new Span('=')
             var c_span = new Span()
 
-            function input_check(title_txt, expr_elem, range, signal){
+            function input_label(title_txt, expr_elem, range, signal){
                 title.set(title_txt)
                 curve = ruler.add_range(ctx_top, range.a, range.b)
 
                 var label = new Span()
-                input = new Input("curvelabel absolute")
-                input.append(document.getElementsByClassName("canvas_cont")[0])
-                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
-
-                input.onchange(function(input){
-                    if(input.value() != (range.b-range.a)){
+                input = InputCheck("curvelabel absolute", (range.b-range.a), 
+                    function(){
                         input.set_cssclass('error')
                         expr_elem.set_cssclass('warning')
 
                         fsm.handle('error')
-                    }else{
-                        //clear css classname
+                    },
+                    function(){
                         input.set_cssclass('')
                         expr_elem.set_cssclass('')
 
@@ -470,11 +479,17 @@
                         swap_elements(input.dom(), label.dom())
 
                         fsm.handle(signal)
-                    }   
-                })
+                    })
+
+                input.append(document.getElementsByClassName("canvas_cont")[0])
+                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
             }
 
             function clear_page(){
+                var parent = document.getElementsByClassName('canvas_cont')[0]
+                remove_child(parent, 'span')
+                remove_child(parent, 'input')
+
                 //Clear canvas
                 clear_ctx(ctx_top)
                 a_span.remove()
@@ -482,11 +497,6 @@
                 b_span.remove()
                 eq_span.remove()
                 c_span.remove()
-
-                var parent = document.getElementsByClassName('canvas_cont')[0]
-                remove_child(parent, 'span')
-                remove_child(parent, 'input')
-
             }
 
             init = new State(function(){
@@ -504,16 +514,38 @@
                 eq_span.append(task_element)
                 c_span.append(task_element)
 
+                console.log('init state')
                 fsm.handle('check a')
 
             })
 
             a_check_state = new State(function(){
-                input_check('Введите первое число', a_span, {a:0, b:exp.a}, 'a right')
+                input_label('Введите первое число', a_span, {a:0, b:exp.a}, 'a right')
+                console.log('a state')
             })
 
             b_check_state = new State(function(){
-                input_check('Введите второе число', b_span, {a:exp.a, b:exp.c}, 'b right')
+                input_label('Введите второе число', b_span, {a:exp.a, b:exp.c}, 'b right')
+                console.log('b state')
+            })
+
+            c_check_state = new State(function(){
+                title.set('Введите сумму двух чисел')
+                console.log('c state')
+
+                input = InputCheck("", exp.c, 
+                    function(){
+                        input.set_cssclass('error')
+                        fsm.handle('error')
+                    },
+                    function(){
+                        input.set_cssclass('')
+                        fsm.handle('c right')
+                    })
+
+                swap_elements(c_span.dom(), input.dom())
+
+
             })
 
             error = new State(function(){
@@ -525,11 +557,15 @@
             a_check_state.transition('a right', b_check_state)
             a_check_state.transition('error', error)
 
-            b_check_state.transition('b right', error)
+            b_check_state.transition('b right', c_check_state   )
             b_check_state.transition('error', error)
+
+            c_check_state.transition('c right', init)
+            c_check_state.transition('error', error)
             
             error.transition('a right', b_check_state)
-            error.transition('b right', b_check_state)
+            error.transition('b right', c_check_state)
+            error.transition('c right', init)
 
             var fsm = new FSM(init, a_check_state, b_check_state, error)
             fsm.start()
@@ -547,7 +583,6 @@
             <div class="task">
             </div>
             <div class="canvas_cont" style="width:900px; height:500px;" >
-                <!-- <input type="text" class="curvelabel" name=""> -->
                 <canvas id="canvas_top" style="z-index: 2;" width="900" height="500"></canvas>
                 <canvas id="canvas_bottom" style="z-index: 1;" width="900" height="500"></canvas>
             </div>
