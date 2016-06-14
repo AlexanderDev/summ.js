@@ -454,8 +454,6 @@
 
         //Вертикальное смещение обеспечивающие пространство для рисование кривых
         var VERTICAL_SHIFT = 300
-        var INPUT_WIDTH = 20
-        var INPUT_HEIGHT = 21
 
         //Main
         //////////////////////////////////////////////////////////////////////////////
@@ -481,6 +479,13 @@
             var c_span = new Span()
 
             function input_label(title_txt, expr_elem, range, signal){
+                function set_label(curve, element){
+                    width = window.getComputedStyle(element.dom()).width.slice(0, -2)
+                    height = window.getComputedStyle(element.dom()).height.slice(0, -2)
+                    MAGIC_CONST = (2*height-curve.radius/4) // Определяет вертикальное смещение 
+                    element.set_position(Point(curve.point.x - width/2.0, curve.point.y - MAGIC_CONST))
+                }
+
                 title.set(title_txt)
                 curve = ruler.add_range(ctx_top, range.a, range.b)
 
@@ -498,14 +503,14 @@
 
                         label.set_value(range.b-range.a)
                         label.set_cssclass('absolute')
-                        label.set_position(curve.point)
                         swap_elements(input.dom(), label.dom())
+                        set_label(curve, label)
 
                         fsm.handle(signal)
                     })
 
                 input.append(document.getElementsByClassName("canvas_cont")[0])
-                input.set_position(Point(curve.point.x-INPUT_WIDTH/2.0, curve.point.y-INPUT_HEIGHT/2.0+curve.radius/5.0-18))
+                set_label(curve, input)
             }
 
             function clear_page(){
