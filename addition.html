@@ -260,20 +260,17 @@
         //////////////////////////////////////////////////////////////////////////////
         function Ruler(ctx_img, img_name, start_point, end_point, unit_px) {
             var loaded = false
-            var width, height
-
-            img = new Image()
+            var img = new Image()
             img.src = img_name
             img.onload = function() {
                 loaded = true
-
                 ctx_img.save()
-                ctx_img.translate(0, VERTICAL_SHIFT) 
-                ctx_img.drawImage(img, 0, 0)
-                ctx_img.restore()
 
-                width = img.width
-                height = img.height
+                //Вертикальное смещение обеспечивающие пространство для рисование кривых
+                ctx_img.translate(0, ctx_img.canvas.height/1.5) 
+                ctx_img.drawImage(img, 0, 0)
+
+                ctx_img.restore()
             }
 
             return {
@@ -282,10 +279,11 @@
                         return Point(start_point.x+unit_px*unit, start_point.y)
                     }
                     ctx.save()
-                    ctx.translate(0, VERTICAL_SHIFT) 
 
+                    ctx.translate(0, ctx.canvas.height/1.5) 
                     curve = draw_curve(ctx, unit2px(start), unit2px(stop))
-                    curve.point.y += VERTICAL_SHIFT
+                    curve.point.y += ctx.canvas.height/1.5
+
                     ctx.restore()
                     return curve
                 }
@@ -451,10 +449,6 @@
                 }
         }
 
-
-        //Вертикальное смещение обеспечивающие пространство для рисование кривых
-        var VERTICAL_SHIFT = 300
-
         //Main
         //////////////////////////////////////////////////////////////////////////////
         window.onload = function() {
@@ -511,6 +505,7 @@
 
                 input.append(document.getElementsByClassName("canvas_cont")[0])
                 set_label(curve, input)
+                input.dom().focus()
             }
 
             function clear_page(){
@@ -574,8 +569,7 @@
                     })
 
                 swap_elements(c_span.dom(), input.dom())
-
-
+                input.dom().focus()
             })
 
             error = new State(function(){
