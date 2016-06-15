@@ -142,25 +142,21 @@
         // Геометрия
         ///////////////////////////////////////////////////////////////////////////////
         function Point(x, y){
-            return {
-                x: x,
-                y: y
-            }
+                this.x = x,
+                this.y = y
         }
 
         function Vector(x, y){
-            return {
-                x: x,
-                y: y
-            }
+                this.x = x,
+                this.y = y
         }
 
         function subtraction_vec(a, b){
-            return Vector(a.x - b.x, a.y - b.y);
+            return new Vector(a.x - b.x, a.y - b.y);
         }
 
         function normal(vec){
-            return normalize(Vector(vec.y, -vec.x));
+            return normalize(new Vector(vec.y, -vec.x));
         }
 
         function len_vec(vec){
@@ -169,22 +165,22 @@
 
         function normalize(vec){
             var l = len_vec(vec);
-            return Vector(vec.x / l, vec.y / l);
+            return new Vector(vec.x / l, vec.y / l);
         }
 
         function sum_vec(a, b){
-            return Vector(a.x + b.x, a.y + b.y);
+            return new Vector(a.x + b.x, a.y + b.y);
         }
 
         function rotate_vec(vec, deg){
             var radians = to_rad(deg);
             var ca = Math.cos(radians);
             var sa = Math.sin(radians);
-            return Vector(ca * vec.x - sa * vec.y, sa * vec.x + ca * vec.y);
+            return new Vector(ca * vec.x - sa * vec.y, sa * vec.x + ca * vec.y);
         }
 
         function vec_scalar(vec, scalar){
-            return Vector(vec.x * scalar, vec.y * scalar);
+            return new Vector(vec.x * scalar, vec.y * scalar);
         }
 
         function to_rad(deg){
@@ -258,37 +254,6 @@
 
         // Элементы страницы
         //////////////////////////////////////////////////////////////////////////////
-        function Ruler(ctx_img, img_name, start_point, end_point, unit_px){
-            var loaded = false;
-            var img = new Image();
-            img.src = img_name;
-            img.onload = function(){
-                loaded = true;
-                ctx_img.save();
-
-                //Вертикальное смещение обеспечивающие пространство для рисование кривых
-                ctx_img.translate(0, ctx_img.canvas.height/1.5);
-                ctx_img.drawImage(img, 0, 0);
-
-                ctx_img.restore();
-            }
-
-            return {
-                add_range:function(ctx, start, stop){
-                    function unit2px(unit){
-                        return Point(start_point.x+unit_px*unit, start_point.y);
-                    }
-                    ctx.save();
-
-                    ctx.translate(0, ctx.canvas.height/1.5);
-                    var curve = draw_curve(ctx, unit2px(start), unit2px(stop));
-                    curve.point.y += ctx.canvas.height/1.5;
-
-                    ctx.restore();
-                    return curve;
-                }
-            }
-        }
 
         //Земеняет элемент1 на элемент2
         function swap_elements(elem1, elem2){
@@ -328,9 +293,40 @@
             }                     
         }
 
+        function Ruler(ctx_img, img_name, start_point, end_point, unit_px){
+            var loaded = false;
+            var img = new Image();
+            img.src = img_name;
+            img.onload = function(){
+                loaded = true;
+                ctx_img.save();
 
-        //Примесь
-        //////////////////////////////////////////////////////////////////////////////
+                //Вертикальное смещение обеспечивающие пространство для рисование кривых
+                ctx_img.translate(0, ctx_img.canvas.height/1.5);
+                ctx_img.drawImage(img, 0, 0);
+
+                ctx_img.restore();
+            }
+
+            return {
+                add_range:function(ctx, start, stop){
+                    function unit2px(unit){
+                        return new Point(start_point.x+unit_px*unit, start_point.y);
+                    }
+                    ctx.save();
+
+                    ctx.translate(0, ctx.canvas.height/1.5);
+                    var curve = draw_curve(ctx, unit2px(start), unit2px(stop));
+                    curve.point.y += ctx.canvas.height/1.5;
+
+                    ctx.restore();
+                    return curve;
+                }
+            }
+        }
+
+
+        // Примесь
         var Element = {
                 append:function(parent){
                     parent.appendChild(this.element);
@@ -356,7 +352,8 @@
                 dom:function(){
                     return this.element;
                 }
-        };
+        }
+
 
         function Input(cssclass){
             var input = document.createElement("input");
@@ -383,6 +380,7 @@
         }
         extend(Span, Element);
 
+
         function InputCheck(cssclass, right, error, success){
             var input = new Input(cssclass);
             input.onchange(function(input){
@@ -403,6 +401,7 @@
             }
         }
 
+
         function Expression(){
                 this.a = 0;
                 this.b = 0;
@@ -418,7 +417,8 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        //Конечный автомат
+        // Конечный автомат
+        //////////////////////////////////////////////////////////////////////////////
         function FSM(){
                 this.current_state = arguments[0]
 
@@ -466,25 +466,36 @@
             ctx_top.lineWidth = 2;
             ctx_top.strokeStyle="#5500ff";
 
-            var ruler = Ruler(ctx_bottom, 'sprite.png', Point(35, 5), Point(815, 5), 39);
+            //Линейка со стрелочками
+            var ruler = Ruler(ctx_bottom, 'sprite.png', new Point(35, 5), new Point(815, 5), 39);
 
+            //Цифры суммы a+b=c
             var a_span = new Span();
             var op_span = new Span('+');
             var b_span = new Span();
             var eq_span = new Span('=');
             var c_span = new Span();
 
+            //Создает текстовое поле ввода над срелочкой и проверяет вводимые значения
             function input_label(title_txt, expr_elem, range, signal){
+
+                //Установть элемент страницы над стрелочкой
                 function set_label(curve, element){
                     var width = window.getComputedStyle(element.dom()).width.slice(0, -2)
                     var height = window.getComputedStyle(element.dom()).height.slice(0, -2)
                     var MAGIC_CONST = (2*height-curve.radius/4); // Определяет вертикальное смещение 
-                    element.set_position(Point(curve.point.x - width/2.0, curve.point.y - MAGIC_CONST))
+                    element.set_position(new Point(curve.point.x - width/2.0, curve.point.y - MAGIC_CONST))
                 }
 
                 title.set(title_txt);
+
+                //Создание стрелочки
                 var curve = ruler.add_range(ctx_top, range.a, range.b);
+
+                //Цифра заменяющая поле ввода 
                 var label = new Span();
+
+                //Создание текстовое поле ввода
                 var input = InputCheck("curvelabel absolute", (range.b-range.a), 
                     function(){
                         input.set_cssclass('error');
@@ -523,6 +534,9 @@
             }
 
             // Определение состояний конечного автомата
+            //////////////////////////////////////////////////////////////////////////////
+
+            //Начальное состояние
             var init = new State(function(){
                 exp.generate();
                 a_span.set_value(exp.a);
@@ -542,14 +556,17 @@
 
             });
 
+            // Проверка первого члена "a"+b=c
             var a_check_state = new State(function(){
                 input_label('Введите первое число', a_span, {a:0, b:exp.a}, 'a right');
             });
 
+            // Проверка второго члена a+"b"=c
             var b_check_state = new State(function(){
                 input_label('Введите второе число', b_span, {a:exp.a, b:exp.c}, 'b right');
             });
 
+            // Проверка суммы a+b="c"
             var c_check_state = new State(function(){
                 title.set('Введите сумму двух чисел');
 
@@ -576,10 +593,12 @@
                 input.dom().focus();
             });
 
+            // Сотояние ошибки
             var error = new State(function(){
                 title.set('Ошибка! Введите верное число');
             });
 
+            // Определение переходов конечного автомата
             init.transition('check a', a_check_state);
 
             a_check_state.transition('a right', b_check_state);
