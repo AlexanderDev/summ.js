@@ -1,0 +1,127 @@
+html,
+        body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, Helvetica, Sans-Serif;
+  color: black;
+}
+
+.header {
+  min-height: 3em;
+  margin-bottom: 2em;
+}
+
+.header #wrapper {
+  text-align: center;
+}
+        /* Header text */
+        
+.header div {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.header #wrapper div {
+  display: inline-block;
+  vertical-align: middle;
+}
+        /* Text */
+        
+.header #wrapper div:last-child {
+}
+        /* Logo */
+        
+.header #wrapper div:first-child {
+  margin: 8px 30px 3px 0px;
+}
+
+.header hr {
+  border: none;
+  background-color: #32382C;
+  height: 2px;
+}
+
+.maket {
+  min-height: 100%;
+  position: relative;
+  width: 90%;
+  max-width: 1100px;
+  margin: auto;
+}
+
+#content,
+        .header #wrapper {
+}
+
+#content {
+            /*padding-top: 2%;*/
+  text-align: center;
+  padding-bottom: 6em;
+  overflow: auto;
+}
+
+canvas {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+div.canvas_cont {
+  margin: 0 auto;
+  position: relative;
+  top: 2em;
+}
+
+.absolute {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 3;
+}
+
+input[type="text"] {
+  text-align: center;
+            /* css 3 */
+  border-radius: 2px;
+            /* mozilla */
+  -moz-border-radius: 2px;
+            /* webkit */
+  -webkit-border-radius: 2px;
+  border: solid 1px #8c8c8c;
+}
+
+.task input[type="text"] {
+  font-size: 2em;
+  font-weight: bold;
+  width: 45px;
+}
+
+.canvas_cont input[type="text"] {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 26px;
+}
+
+div.task {
+  height: 2.5em;
+}
+
+div.task span {
+  font-size: 2em;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.canvas_cont span {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+}
+
+.warning {
+  background-color: #ff9933;
+}
